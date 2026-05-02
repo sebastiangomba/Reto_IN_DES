@@ -1,0 +1,5 @@
+pandas 
+duckdb
+flask
+openpyxl
+werkzeug
