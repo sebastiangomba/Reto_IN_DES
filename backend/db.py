@@ -286,3 +286,31 @@ def listar_semestres() -> list[str]:
             "SELECT ciclo_lectivo, filas_insertadas, cargado_en FROM semestres_cargados ORDER BY ciclo_lectivo"
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def obtener_opciones(profesor: str | None = None, semestres: list[str] | None = None) -> dict:
+    """Obtiene materias, departamentos y componentes únicos para los filtros."""
+    query = "SELECT DISTINCT nombre_curso, descripcion_materia, componente_desc FROM clases WHERE 1=1"
+    params = []
+
+    if profesor:
+        query += " AND UPPER(nombre_profesor) LIKE UPPER(?)"
+        params.append(f"%{profesor}%")
+
+    if semestres:
+        placeholders = ",".join("?" * len(semestres))
+        query += f" AND ciclo_lectivo IN ({placeholders})"
+        params.extend(semestres)
+
+    with get_conn() as conn:
+        rows = conn.execute(query, params).fetchall()
+
+    materias = sorted(list(set(r["nombre_curso"] for r in rows if r["nombre_curso"])))
+    departamentos = sorted(list(set(r["descripcion_materia"] for r in rows if r["descripcion_materia"])))
+    componentes = sorted(list(set(r["componente_desc"] for r in rows if r["componente_desc"])))
+
+    return {
+        "materias": materias,
+        "departamentos": departamentos,
+        "componentes": componentes
+    }

@@ -3,3 +3,5 @@ duckdb
 flask
 openpyxl
 werkzeug
+flask-cors
+xhtml2pdf
