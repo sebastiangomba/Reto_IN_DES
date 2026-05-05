@@ -374,22 +374,27 @@ def enviar_certificado():
 def webhook_n8n():
     """
     Endpoint para ser llamado por n8n cuando llegue un correo de Gmail.
-    Se espera un JSON con el cuerpo del correo.
+    Acepta el nombre directo en 'profesor' o lo extrae de 'body'.
     """
     data = request.json
-    cuerpo = data.get("body", "")
     
-    # Extraer nombre del profesor usando Regex
-    import re
-    match = re.search(r"profesor:\s*(.*)", cuerpo, re.IGNORECASE)
+    # 1. Intentar obtener el nombre directamente
+    profesor_nombre = data.get("profesor")
     
-    if not match:
-        return error("No se encontró 'profesor: [Nombre]' en el cuerpo del correo.")
+    # 2. Si no está directo, buscar en el cuerpo del mensaje
+    if not profesor_nombre:
+        cuerpo = data.get("body", "")
+        import re
+        match = re.search(r"profesor:\s*(.*)", cuerpo, re.IGNORECASE)
+        if match:
+            profesor_nombre = match.group(1).strip()
+    
+    if not profesor_nombre:
+        return error("No se encontró el nombre del profesor (usa el campo 'profesor' o 'body').")
         
-    profesor_nombre = match.group(1).strip()
     destinatario = data.get("from_email", "destinatario-por-defecto@gmail.com")
     
-    # 1. Consultar datos en la DB
+    # 3. Consultar datos en la DB
     try:
         resultados = db.consultar_consolidado(profesor=profesor_nombre)
         if not resultados:
