@@ -6,3 +6,4 @@ werkzeug
 flask-cors
 xhtml2pdf
 gunicorn
+python-bidi==0.4.2
