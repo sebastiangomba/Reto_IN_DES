@@ -409,16 +409,24 @@ def webhook_n8n():
         if not pdf_content or not excel_content:
             return error("Error generando los archivos en el servidor.")
             
-        # 3. Enviar Correo con ambos archivos
-        exito = enviar_correo_con_adjuntos(destinatario, profesor_nombre, pdf_content, excel_content)
+        # 3. Codificar a Base64 para n8n
+        import base64
+        pdf_b64 = base64.b64encode(pdf_content).decode('utf-8')
+        excel_b64 = base64.b64encode(excel_content).decode('utf-8')
+            
+        print(f">>> n8n AUTOMATION: Archivos generados y enviados en respuesta para {profesor_nombre}")
         
-        if exito:
-            print(f">>> n8n AUTOMATION: Certificado y Excel enviados para {profesor_nombre}")
-            return ok({"mensaje": f"Certificado y Excel enviados a {destinatario} para {profesor_nombre}"})
-        else:
-            return error("No se pudo enviar el correo, revisa la configuración SMTP.")
+        return ok({
+            "ok": True,
+            "mensaje": f"Datos encontrados y archivos generados para {profesor_nombre}",
+            "pdf_base64": pdf_b64,
+            "excel_base64": excel_b64,
+            "filename_pdf": f"Certificado_{profesor_nombre}.pdf",
+            "filename_excel": f"Consolidado_{profesor_nombre}.xlsx"
+        })
         
     except Exception as e:
+        import traceback
         print(">>> ERROR EN WEBHOOK N8N:")
         traceback.print_exc()
         return error(f"Error en el proceso automático: {e}", status=500)
