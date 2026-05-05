@@ -20,6 +20,8 @@ from pathlib import Path
 from io import BytesIO
 from xhtml2pdf import pisa
 import smtplib
+import base64
+import traceback
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
@@ -417,6 +419,8 @@ def webhook_n8n():
             return error("No se pudo enviar el correo, revisa la configuración SMTP.")
         
     except Exception as e:
+        print(">>> ERROR EN WEBHOOK N8N:")
+        traceback.print_exc()
         return error(f"Error en el proceso automático: {e}", status=500)
 
 

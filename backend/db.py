@@ -264,7 +264,7 @@ def consultar_consolidado(
         filtro_semestre=filtro_semestre,
     )
 
-    result = duckdb.sql(query).df()
+    result = duckdb.sql(query).df().fillna("—")
     return result.to_dict(orient="records")
 
 
